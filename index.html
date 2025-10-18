@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Змейка - Рекорды</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .game-layout {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .game-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .game-container {
+            position: relative;
+        }
+        
+        #gameCanvas {
+            border: 3px solid #333;
+            border-radius: 10px;
+            background: #000;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .game-controls {
+            text-align: center;
+            margin: 15px 0;
+        }
+        
+        .controls button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            margin: 5px;
+            transition: transform 0.2s;
+        }
+        
+        .controls button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+        
+        .section h2 {
+            color: #495057;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 10px;
+        }
+        
+        .score-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .score-item .score {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .score-item .level {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .score-item .date {
+            color: #888;
+            font-size: 0.8em;
+            text-align: right;
+        }
+        
+        .current-stats {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .player-input {
+            margin: 20px 0;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .new-record {
+            animation: pulse 1s infinite;
+            background: linear-gradient(135deg, #ffd93d 0%, #ff6b6b 100%) !important;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+        }
+        
+        .game-over h2 {
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            font-size: 2em;
+        }
+        
+        .mobile-controls {
+            display: none;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-controls {
+                display: grid;
+            }
+        }
+        
+        .mobile-controls button {
+            background: rgba(102, 126, 234, 0.8);
+            color: white;
+            border: none;
+            padding: 20px;
+            font-size: 1.5em;
+            border-radius: 10px;
+        }
+        
+        .control-up { grid-column: 2; grid-row: 1; }
+        .control-left { grid-column: 1; grid-row: 2; }
+        .control-right { grid-column: 3; grid-row: 2; }
+        .control-down { grid-column: 2; grid-row: 2; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐍 Змейка - Рекорды</h1>
+        
+        <div class="game-layout">
+            <div class="game-container">
+                <canvas id="gameCanvas" width="600" height="400"></canvas>
+                <div class="game-controls">
+                    <div class="controls">
+                        <button onclick="startGame()">🎮 Начать игру</button>
+                        <button onclick="pauseGame()">⏸️ Пауза</button>
+                        <button onclick="saveScore()">💾 Сохранить рекорд</button>
+                    </div>
+                </div>
+                
+                <div class="mobile-controls">
+                    <button class="control-up" onclick="changeDirection('up')">↑</button>
+                    <button class="control-left" onclick="changeDirection('left')">←</button>
+                    <button class="control-right" onclick="changeDirection('right')">→</button>
+                    <button class="control-down" onclick="changeDirection('down')">↓</button>
+                </div>
+                
+                <div id="gameOver" class="game-over">
+                    <h2>Игра окончена!</h2>
+                    <p>Ваш счет: <span id="final-score">0</span></p>
+                    <p>Уровень: <span id="final-level">1</span></p>
+                    <button onclick="startGame()">🔄 Играть снова</button>
+                </div>
+            </div>
+            
+            <div class="sidebar">
+                <div class="current-stats">
+                    <h2>Текущая игра</h2>
+                    <div class="stats-grid">
+                        <div class="stat">
+                            <div class="stat-value" id="current-score">0</div>
+                            <div class="stat-label">ОЧКИ</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="current-level">1</div>
+                            <div class="stat-label">УРОВЕНЬ</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="snake-length">1</div>
+                            <div class="stat-label">ДЛИНА</div>
+                        </div>
+                    </div>
+                    
+                    <div class="player-input">
+                        <input type="text" id="player-name" placeholder="Введите ваше имя" maxlength="20">
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>🏆 Ваши лучшие результаты</h2>
+                    <div id="personal-results" class="loading">
+                        Загрузка...
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>📊 Таблица лидеров</h2>
+                    <div id="leaderboard" class="loading">
+                        Загрузка...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 🔧 НАСТРОЙКИ - ЗАМЕНИТЕ НА СВОИ ДАННЫЕ С SUPABASE
+        const SUPABASE_URL = 'https://uxkbeldvmmayqflsqpzw.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV4a2JlbGR2bW1heXFmbHNxcHp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA3MDk0OTcsImV4cCI6MjA3NjI4NTQ5N30.55B-bBS0yAD4G1srxbPx0CdwSCZgnS2gycAg_hLmwb0';
+
+        // Переменные игры
+        let canvas, ctx;
+        let snake = [];
+        let food = {};
+        let gridSize = 20;
+        let direction = 'right';
+        let gameLoop;
+        let isPaused = false;
+        let isGameOver = false;
+        let currentScore = 0;
+        let currentLevel = 1;
+        let snakeLength = 1;
+        let gameSpeed = 150;
+        let playerName = '';
+        let personalBest = 0;
+
+        // Инициализация игры
+        function initGame() {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            
+            resetGame();
+            loadScores();
+            
+            // Управление с клавиатуры
+            document.addEventListener('keydown', handleKeyPress);
+        }
+
+        function resetGame() {
+            // Сбрасываем змейку
+            snake = [{x: 5, y: 10}];
+            snakeLength = 1;
+            
+            // Создаем первую еду
+            createFood();
+            
+            // Сбрасываем счет и уровень
+            currentScore = 0;
+            currentLevel = 1;
+            gameSpeed = 150;
+            direction = 'right';
+            isGameOver = false;
+            isPaused = false;
+            
+            document.getElementById('gameOver').style.display = 'none';
+            updateDisplay();
+        }
+
+        function startGame() {
+            if (gameLoop) {
+                clearInterval(gameLoop);
+            }
+            resetGame();
+            gameLoop = setInterval(updateGame, gameSpeed);
+        }
+
+        function pauseGame() {
+            if (isGameOver) return;
+            
+            isPaused = !isPaused;
+            if (isPaused) {
+                clearInterval(gameLoop);
+            } else {
+                gameLoop = setInterval(updateGame, gameSpeed);
+            }
+        }
+
+        function updateGame() {
+            if (isPaused || isGameOver) return;
+            
+            moveSnake();
+            checkCollision();
+            checkFood();
+            drawGame();
+        }
+
+        function moveSnake() {
+            const head = {...snake[0]};
+            
+            switch(direction) {
+                case 'up': head.y--; break;
+                case 'down': head.y++; break;
+                case 'left': head.x--; break;
+                case 'right': head.x++; break;
+            }
+            
+            snake.unshift(head);
+            
+            // Удаляем хвост если змейка не выросла
+            if (snake.length > snakeLength) {
+                snake.pop();
+            }
+        }
+
+        function checkCollision() {
+            const head = snake[0];
+            
+            // Стены
+            if (head.x < 0 || head.x >= canvas.width/gridSize || 
+                head.y < 0 || head.y >= canvas.height/gridSize) {
+                gameOver();
+                return;
+            }
+            
+            // Сама в себя
+            for (let i = 1; i < snake.length; i++) {
+                if (head.x === snake[i].x && head.y === snake[i].y) {
+                    gameOver();
+                    return;
+                }
+            }
+        }
+
+        function checkFood() {
+            const head = snake[0];
+            
+            if (head.x === food.x && head.y === food.y) {
+                // Увеличиваем змейку и счет
+                snakeLength++;
+                currentScore += 10 * currentLevel;
+                
+                // Повышаем уровень каждые 100 очков
+                const newLevel = Math.floor(currentScore / 100) + 1;
+                if (newLevel > currentLevel) {
+                    currentLevel = newLevel;
+                    gameSpeed = Math.max(50, 150 - (currentLevel * 10)); // Увеличиваем скорость
+                    clearInterval(gameLoop);
+                    gameLoop = setInterval(updateGame, gameSpeed);
+                }
+                
+                createFood();
+                updateDisplay();
+            }
+        }
+
+        function createFood() {
+            food = {
+                x: Math.floor(Math.random() * (canvas.width / gridSize)),
+                y: Math.floor(Math.random() * (canvas.height / gridSize))
+            };
+            
+            // Проверяем чтобы еда не появилась на змейке
+            for (let segment of snake) {
+                if (segment.x === food.x && segment.y === food.y) {
+                    createFood();
+                    break;
+                }
+            }
+        }
+
+        function drawGame() {
+            // Очищаем canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Рисуем змейку
+            snake.forEach((segment, index) => {
+                if (index === 0) {
+                    ctx.fillStyle = '#4CAF50'; // Голова
+                } else {
+                    ctx.fillStyle = '#8BC34A'; // Тело
+                }
+                ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 1, gridSize - 1);
+            });
+            
+            // Рисуем еду
+            ctx.fillStyle = '#ff6b6b';
+            ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 1, gridSize - 1);
+            
+            // Рисуем сетку (опционально)
+            ctx.strokeStyle = '#333';
+            for (let x = 0; x < canvas.width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+        }
+
+        function gameOver() {
+            isGameOver = true;
+            clearInterval(gameLoop);
+            
+            document.getElementById('final-score').textContent = currentScore;
+            document.getElementById('final-level').textContent = currentLevel;
+            document.getElementById('gameOver').style.display = 'block';
+        }
+
+        function handleKeyPress(e) {
+            if (isPaused || isGameOver) return;
+            
+            switch(e.key) {
+                case 'ArrowUp': if (direction !== 'down') direction = 'up'; break;
+                case 'ArrowDown': if (direction !== 'up') direction = 'down'; break;
+                case 'ArrowLeft': if (direction !== 'right') direction = 'left'; break;
+                case 'ArrowRight': if (direction !== 'left') direction = 'right'; break;
+                case ' ': pauseGame(); break; // Пробел для паузы
+            }
+        }
+
+        function changeDirection(newDirection) {
+            if (isPaused || isGameOver) return;
+            
+            // Предотвращаем разворот на 180 градусов
+            if ((newDirection === 'up' && direction !== 'down') ||
+                (newDirection === 'down' && direction !== 'up') ||
+                (newDirection === 'left' && direction !== 'right') ||
+                (newDirection === 'right' && direction !== 'left')) {
+                direction = newDirection;
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('current-score').textContent = currentScore;
+            document.getElementById('current-level').textContent = currentLevel;
+            document.getElementById('snake-length').textContent = snakeLength;
+        }
+
+        // 🔄 ОСТАЛЬНОЙ КОД С БАЗОЙ ДАННЫХ ОСТАЕТСЯ ПРЕЖНИМ
+        function initSupabase() {
+            return {
+                async query(sql) {
+                    try {
+                        const response = await fetch(`${SUPABASE_URL}/rest/v1/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'apikey': SUPABASE_ANON_KEY,
+                                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                            },
+                            body: JSON.stringify({ query: sql })
+                        });
+                        return await response.json();
+                    } catch (error) {
+                        console.error('Ошибка Supabase:', error);
+                        return getFromLocalStorage();
+                    }
+                },
+                
+                async insertScore(name, score, level) {
+                    try {
+                        const response = await fetch(`${SUPABASE_URL}/rest/v1/scores`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'apikey': SUPABASE_ANON_KEY,
+                                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                            },
+                            body: JSON.stringify({
+                                player_name: name,
+                                score: score,
+                                level: level,
+                                created_at: new Date().toISOString()
+                            })
+                        });
+                        return await response.json();
+                    } catch (error) {
+                        console.error('Ошибка сохранения:', error);
+                        saveToLocalStorage(name, score, level);
+                        return { success: true };
+                    }
+                }
+            };
+        }
+
+        const supabase = initSupabase();
+
+        function getFromLocalStorage() {
+            const scores = JSON.parse(localStorage.getItem('snakeScores') || '[]');
+            const personal = JSON.parse(localStorage.getItem('snakePersonalBest') || '[]');
+            return { scores, personal };
+        }
+
+        function saveToLocalStorage(name, score, level) {
+            const scores = JSON.parse(localStorage.getItem('snakeScores') || '[]');
+            scores.push({ player_name: name, score, level, created_at: new Date().toISOString() });
+            
+            scores.sort((a, b) => b.score - a.score);
+            const topScores = scores.slice(0, 10);
+            localStorage.setItem('snakeScores', JSON.stringify(topScores));
+            
+            const personal = JSON.parse(localStorage.getItem('snakePersonalBest') || '[]');
+            personal.push({ score, level, created_at: new Date().toISOString() });
+            personal.sort((a, b) => b.score - a.score);
+            const topPersonal = personal.slice(0, 5);
+            localStorage.setItem('snakePersonalBest', JSON.stringify(topPersonal));
+        }
+
+        async function saveScore() {
+            playerName = document.getElementById('player-name').value.trim() || 'Анонимный игрок';
+            
+            if (currentScore > 0) {
+                await supabase.insertScore(playerName, currentScore, currentLevel);
+                await loadScores();
+                alert(`Рекорд сохранен! ${playerName}: ${currentScore} очков`);
+            } else {
+                alert('Сыграйте хотя бы один раунд для сохранения!');
+            }
+        }
+
+        async function loadScores() {
+            try {
+                const leaderboardData = await supabase.query(
+                    'SELECT player_name, score, level, created_at FROM scores ORDER BY score DESC LIMIT 10'
+                );
+                
+                const personalData = await supabase.query(
+                    'SELECT score, level, created_at FROM scores ORDER BY score DESC LIMIT 5'
+                );
+
+                updateLeaderboard(leaderboardData.scores || []);
+                updatePersonalResults(personalData.personal || []);
+                
+            } catch (error) {
+                console.error('Ошибка загрузки:', error);
+                const fallbackData = getFromLocalStorage();
+                updateLeaderboard(fallbackData.scores);
+                updatePersonalResults(fallbackData.personal);
+            }
+        }
+
+        function updateLeaderboard(scores) {
+            const leaderboardElement = document.getElementById('leaderboard');
+            
+            if (scores.length === 0) {
+                leaderboardElement.innerHTML = '<div class="score-item">Пока нет рекордов</div>';
+                return;
+            }
+            
+            leaderboardElement.innerHTML = scores.map((player, index) => `
+                <div class="score-item ${player.score === personalBest ? 'new-record' : ''}">
+                    <div class="score">${index + 1}. ${player.player_name} - ${player.score} очков</div>
+                    <div class="level">Уровень: ${player.level}</div>
+                    <div class="date">${new Date(player.created_at).toLocaleDateString('ru-RU')}</div>
+                </div>
+            `).join('');
+        }
+
+        function updatePersonalResults(scores) {
+            const personalResultsElement = document.getElementById('personal-results');
+            
+            if (scores.length === 0) {
+                personalResultsElement.innerHTML = '<div class="score-item">Пока нет ваших рекордов</div>';
+                return;
+            }
+            
+            if (scores.length > 0) {
+                personalBest = scores[0].score;
+            }
+            
+            personalResultsElement.innerHTML = scores.map((score, index) => `
+                <div class="score-item ${index === 0 ? 'new-record' : ''}">
+                    <div class="score">${index + 1}. ${score.score} очков</div>
+                    <div class="level">Уровень: ${score.level}</div>
+                    <div class="date">${new Date(score.created_at).toLocaleDateString('ru-RU')}</div>
+                </div>
+            `).join('');
+        }
+
+        // Запуск игры при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            initGame();
+            drawGame(); // Начальная отрисовка
+            
+            // Автосохранение каждые 30 секунд во время игры
+            setInterval(() => {
+                if (currentScore > 0 && playerName && !isGameOver) {
+                    saveScore();
+                }
+            }, 30000);
+        });
+    </script>
+</body>
+</html>
