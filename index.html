@@ -493,11 +493,11 @@
             <input type="password" id="password" placeholder="Введите пароль" maxlength="20">
         </div>
         
-        <button class="login-btn" onclick="login()">Войти в игру</button>
+        <button class="login-btn" id="loginBtn">Войти в игру</button>
         
         <div class="form-divider">или</div>
         
-        <a href="#" class="register-link" onclick="register()">Нет аккаунта? Зарегистрироваться</a>
+        <a href="#" class="register-link" id="registerLink">Нет аккаунта? Зарегистрироваться</a>
     </div>
 
     <!-- Игровой экран -->
@@ -507,7 +507,7 @@
             
             <div class="player-info">
                 <h2>Игрок: <span id="current-player">Гость</span></h2>
-                <button class="logout-btn" onclick="logout()">Выйти</button>
+                <button class="logout-btn" id="logoutBtn">Выйти</button>
             </div>
 
             <div class="game-layout">
@@ -516,18 +516,18 @@
                     
                     <div class="game-controls">
                         <div class="controls">
-                            <button onclick="startGame()">🎮 Начать игру</button>
-                            <button id="pauseBtn" onclick="togglePause()">⏸️ Пауза</button>
-                            <button onclick="saveScore()">💾 Сохранить</button>
-                            <button onclick="showSkinModal()">🎨 Скины</button>
+                            <button id="startBtn">🎮 Начать игру</button>
+                            <button id="pauseBtn">⏸️ Пауза</button>
+                            <button id="saveBtn">💾 Сохранить</button>
+                            <button id="skinBtn">🎨 Скины</button>
                         </div>
                     </div>
                     
                     <div class="mobile-controls">
-                        <button class="control-up" onclick="changeDirection('up')">↑</button>
-                        <button class="control-left" onclick="changeDirection('left')">←</button>
-                        <button class="control-right" onclick="changeDirection('right')">→</button>
-                        <button class="control-down" onclick="changeDirection('down')">↓</button>
+                        <button class="control-up" id="upBtn">↑</button>
+                        <button class="control-left" id="leftBtn">←</button>
+                        <button class="control-right" id="rightBtn">→</button>
+                        <button class="control-down" id="downBtn">↓</button>
                     </div>
                     
                     <div class="current-stats">
@@ -552,7 +552,7 @@
                         <h2>Игра окончена!</h2>
                         <p>Ваш счет: <span id="final-score">0</span></p>
                         <p>Уровень: <span id="final-level">1</span></p>
-                        <button onclick="startGame()">🔄 Играть снова</button>
+                        <button id="restartBtn">🔄 Играть снова</button>
                     </div>
                 </div>
                 
@@ -560,7 +560,7 @@
                     <div class="section">
                         <div class="section-header">
                             <h2>🏆 Ваши лучшие результаты</h2>
-                            <button class="refresh-btn" onclick="loadScores()">Обновить</button>
+                            <button class="refresh-btn" id="refreshPersonalBtn">Обновить</button>
                         </div>
                         <div id="personal-results" class="loading">У вас пока нет сохраненных рекордов</div>
                     </div>
@@ -568,7 +568,7 @@
                     <div class="section">
                         <div class="section-header">
                             <h2>📊 Общая таблица лидеров</h2>
-                            <button class="refresh-btn" onclick="loadScores()">Обновить</button>
+                            <button class="refresh-btn" id="refreshLeaderboardBtn">Обновить</button>
                         </div>
                         <div id="leaderboard" class="loading">Пока нет рекордов</div>
                     </div>
@@ -580,421 +580,451 @@
             <div class="modal-content">
                 <h2>🎨 Выберите скин</h2>
                 <div class="skin-options">
-                    <div class="skin-option selected" onclick="selectSkin('classic')">
+                    <div class="skin-option selected" id="classicSkin">
                         <div class="skin-preview" style="background: linear-gradient(135deg, #4CAF50, #8BC34A);"></div>
                         <div>Классический</div>
                     </div>
-                    <div class="skin-option" onclick="selectSkin('fire')">
+                    <div class="skin-option" id="fireSkin">
                         <div class="skin-preview" style="background: linear-gradient(135deg, #ff6b6b, #ffa726);"></div>
                         <div>Огненный</div>
                     </div>
-                    <div class="skin-option" onclick="selectSkin('ice')">
+                    <div class="skin-option" id="iceSkin">
                         <div class="skin-preview" style="background: linear-gradient(135deg, #4FC3F7, #29B6F6);"></div>
                         <div>Ледяной</div>
                     </div>
-                    <div class="skin-option" onclick="selectSkin('rainbow')">
+                    <div class="skin-option" id="rainbowSkin">
                         <div class="skin-preview" style="background: linear-gradient(135deg, #FF4081, #7C4DFF);"></div>
                         <div>Радужный</div>
                     </div>
                 </div>
-                <button onclick="hideSkinModal()" style="width: 100%; margin-top: 15px;">Закрыть</button>
+                <button id="closeSkinBtn" style="width: 100%; margin-top: 15px;">Закрыть</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Конфигурация
-        const SUPABASE_URL = 'https://uxkbeldvmmayqflsqpzw.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV4a2JlbGR2bW1heXFmbHNxcHp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA3MDk0OTcsImV4cCI6MjA3NjI4NTQ5N30.55B-bBS0yAD4G1srxbPx0CdwSCZgnS2gycAg_hLmwb0';
-
-        // Переменные игры
-        let canvas, ctx;
-        let snake = [];
-        let food = {};
-        let gridSize = 20;
-        let direction = 'right';
-        let gameLoop;
-        let isPaused = false;
-        let isGameOver = false;
-        let currentScore = 0;
-        let currentLevel = 1;
-        let snakeLength = 1;
-        let gameSpeed = 150;
-        let playerName = '';
-        let currentSkin = 'classic';
-
-        const skins = {
-            classic: { head: '#4CAF50', body: '#8BC34A', food: '#ff6b6b' },
-            fire: { head: '#ff6b6b', body: '#ffa726', food: '#4FC3F7' },
-            ice: { head: '#4FC3F7', body: '#29B6F6', food: '#ff6b6b' },
-            rainbow: { head: '#FF4081', body: '#7C4DFF', food: '#4CAF50' }
-        };
-
-        // Функции авторизации
-        function login() {
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
+        (function() {
+            'use strict';
             
-            if (!username || !password) {
-                alert('Пожалуйста, заполните все поля!');
-                return;
-            }
-            
-            const savedPassword = localStorage.getItem(`snake_password_${username}`);
-            if (!savedPassword) {
-                alert('Аккаунт не найден! Зарегистрируйтесь сначала.');
-                return;
-            }
-            
-            if (savedPassword !== password) {
-                alert('Неверный пароль!');
-                return;
-            }
-            
-            playerName = username;
-            localStorage.setItem('currentPlayer', username);
-            showGameScreen();
-        }
-        
-        function register() {
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
-            
-            if (!username || !password) {
-                alert('Пожалуйста, заполните все поля!');
-                return;
-            }
-            
-            const existingPassword = localStorage.getItem(`snake_password_${username}`);
-            if (existingPassword) {
-                alert('Этот никнейм уже занят!');
-                return;
-            }
-            
-            localStorage.setItem(`snake_password_${username}`, password);
-            playerName = username;
-            localStorage.setItem('currentPlayer', username);
-            
-            alert('Аккаунт успешно создан! Добро пожаловать в игру!');
-            showGameScreen();
-        }
-        
-        function logout() {
-            localStorage.removeItem('currentPlayer');
-            showLoginScreen();
-        }
-        
-        function showLoginScreen() {
-            document.getElementById('loginScreen').style.display = 'block';
-            document.getElementById('gameScreen').style.display = 'none';
-        }
-        
-        function showGameScreen() {
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('gameScreen').style.display = 'block';
-            document.getElementById('current-player').textContent = playerName;
-            initGame();
-            loadScores();
-        }
+            // Конфигурация
+            const SUPABASE_URL = 'https://uxkbeldvmmayqflsqpzw.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV4a2JlbGR2bW1heXFmbHNxcHp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA3MDk0OTcsImV4cCI6MjA3NjI4NTQ5N30.55B-bBS0yAD4G1srxbPx0CdwSCZgnS2gycAg_hLmwb0';
 
-        // Функции игры
-        function initGame() {
-            canvas = document.getElementById('gameCanvas');
-            ctx = canvas.getContext('2d');
-            adjustCanvasSize();
-            resetGame();
-            document.addEventListener('keydown', handleKeyPress);
-            window.addEventListener('resize', adjustCanvasSize);
-        }
+            // Переменные игры
+            let canvas, ctx;
+            let snake = [];
+            let food = {};
+            let gridSize = 20;
+            let direction = 'right';
+            let gameLoop;
+            let isPaused = false;
+            let isGameOver = false;
+            let currentScore = 0;
+            let currentLevel = 1;
+            let snakeLength = 1;
+            let gameSpeed = 150;
+            let playerName = '';
+            let currentSkin = 'classic';
 
-        function adjustCanvasSize() {
-            const container = document.querySelector('.game-container');
-            const maxWidth = container.clientWidth - 40;
-            const aspectRatio = 600 / 400;
-            const newWidth = Math.min(600, maxWidth);
-            const newHeight = newWidth / aspectRatio;
-            
-            canvas.style.width = newWidth + 'px';
-            canvas.style.height = newHeight + 'px';
-        }
-
-        function resetGame() {
-            snake = [{x: 5, y: 10}];
-            snakeLength = 1;
-            createFood();
-            currentScore = 0;
-            currentLevel = 1;
-            gameSpeed = 150;
-            direction = 'right';
-            isGameOver = false;
-            isPaused = false;
-            updatePauseButton();
-            document.getElementById('gameOver').style.display = 'none';
-            updateDisplay();
-        }
-
-        function startGame() {
-            if (!playerName) { alert('Сначала авторизуйтесь!'); return; }
-            if (gameLoop) clearInterval(gameLoop);
-            resetGame();
-            gameLoop = setInterval(updateGame, gameSpeed);
-        }
-
-        function togglePause() {
-            if (isGameOver) return;
-            isPaused = !isPaused;
-            updatePauseButton();
-            if (isPaused) clearInterval(gameLoop);
-            else gameLoop = setInterval(updateGame, gameSpeed);
-        }
-
-        function updatePauseButton() {
-            document.getElementById('pauseBtn').textContent = isPaused ? '▶️ Продолжить' : '⏸️ Пауза';
-        }
-
-        function updateGame() {
-            if (isPaused || isGameOver) return;
-            moveSnake();
-            checkCollision();
-            checkFood();
-            drawGame();
-        }
-
-        function moveSnake() {
-            const head = {...snake[0]};
-            switch(direction) {
-                case 'up': head.y--; break;
-                case 'down': head.y++; break;
-                case 'left': head.x--; break;
-                case 'right': head.x++; break;
-            }
-            snake.unshift(head);
-            if (snake.length > snakeLength) snake.pop();
-        }
-
-        function checkCollision() {
-            const head = snake[0];
-            if (head.x < 0 || head.x >= canvas.width/gridSize || head.y < 0 || head.y >= canvas.height/gridSize) {
-                gameOver(); return;
-            }
-            for (let i = 1; i < snake.length; i++) {
-                if (head.x === snake[i].x && head.y === snake[i].y) {
-                    gameOver(); return;
-                }
-            }
-        }
-
-        function checkFood() {
-            const head = snake[0];
-            if (head.x === food.x && head.y === food.y) {
-                snakeLength++;
-                currentScore += 10 * currentLevel;
-                const newLevel = Math.floor(currentScore / 100) + 1;
-                if (newLevel > currentLevel) {
-                    currentLevel = newLevel;
-                    gameSpeed = Math.max(50, 150 - (currentLevel * 10));
-                    clearInterval(gameLoop);
-                    gameLoop = setInterval(updateGame, gameSpeed);
-                }
-                createFood();
-                updateDisplay();
-            }
-        }
-
-        function createFood() {
-            food = {
-                x: Math.floor(Math.random() * (canvas.width / gridSize)),
-                y: Math.floor(Math.random() * (canvas.height / gridSize))
+            const skins = {
+                classic: { head: '#4CAF50', body: '#8BC34A', food: '#ff6b6b' },
+                fire: { head: '#ff6b6b', body: '#ffa726', food: '#4FC3F7' },
+                ice: { head: '#4FC3F7', body: '#29B6F6', food: '#ff6b6b' },
+                rainbow: { head: '#FF4081', body: '#7C4DFF', food: '#4CAF50' }
             };
-            for (let segment of snake) {
-                if (segment.x === food.x && segment.y === food.y) {
-                    createFood(); break;
+
+            // Функции авторизации
+            function login() {
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value.trim();
+                
+                if (!username || !password) {
+                    alert('Пожалуйста, заполните все поля!');
+                    return;
                 }
-            }
-        }
-
-        function drawGame() {
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            const skin = skins[currentSkin];
-            
-            snake.forEach((segment, index) => {
-                ctx.fillStyle = index === 0 ? skin.head : skin.body;
-                ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 1, gridSize - 1);
-            });
-            
-            ctx.fillStyle = skin.food;
-            ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 1, gridSize - 1);
-        }
-
-        function gameOver() {
-            isGameOver = true;
-            clearInterval(gameLoop);
-            document.getElementById('final-score').textContent = currentScore;
-            document.getElementById('final-level').textContent = currentLevel;
-            document.getElementById('gameOver').style.display = 'block';
-        }
-
-        function handleKeyPress(e) {
-            if (isPaused || isGameOver) return;
-            switch(e.key) {
-                case 'ArrowUp': if (direction !== 'down') direction = 'up'; break;
-                case 'ArrowDown': if (direction !== 'up') direction = 'down'; break;
-                case 'ArrowLeft': if (direction !== 'right') direction = 'left'; break;
-                case 'ArrowRight': if (direction !== 'left') direction = 'right'; break;
-                case ' ': togglePause(); break;
-            }
-        }
-
-        function changeDirection(newDirection) {
-            if (isPaused || isGameOver) return;
-            if ((newDirection === 'up' && direction !== 'down') ||
-                (newDirection === 'down' && direction !== 'up') ||
-                (newDirection === 'left' && direction !== 'right') ||
-                (newDirection === 'right' && direction !== 'left')) {
-                direction = newDirection;
-            }
-        }
-
-        function updateDisplay() {
-            document.getElementById('current-score').textContent = currentScore;
-            document.getElementById('current-level').textContent = currentLevel;
-            document.getElementById('snake-length').textContent = snakeLength;
-        }
-
-        // Система рекордов
-        const supabase = {
-            async fetchScores() {
-                try {
-                    const response = await fetch(`${SUPABASE_URL}/rest/v1/scores?select=*&order=score.desc.nullslast`, {
-                        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
-                    });
-                    if (!response.ok) throw new Error('Ошибка загрузки');
-                    return await response.json();
-                } catch (error) {
-                    return getFromLocalStorage();
+                
+                const savedPassword = localStorage.getItem(`snake_password_${username}`);
+                if (!savedPassword) {
+                    alert('Аккаунт не найден! Зарегистрируйтесь сначала.');
+                    return;
                 }
-            },
-            
-            async insertScore(name, score, level) {
-                try {
-                    const response = await fetch(`${SUPABASE_URL}/rest/v1/scores`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-                        body: JSON.stringify({ player_name: name, score: score, level: level, created_at: new Date().toISOString() })
-                    });
-                    if (!response.ok) throw new Error('Ошибка сохранения');
-                    return await response.json();
-                } catch (error) {
-                    saveToLocalStorage(name, score, level);
-                    return { success: true };
+                
+                if (savedPassword !== password) {
+                    alert('Неверный пароль!');
+                    return;
                 }
-            }
-        };
-
-        function getFromLocalStorage() {
-            return JSON.parse(localStorage.getItem('allSnakeScores') || '[]');
-        }
-
-        function saveToLocalStorage(name, score, level) {
-            const scores = JSON.parse(localStorage.getItem('allSnakeScores') || '[]');
-            scores.push({ player_name: name, score: score, level: level, created_at: new Date().toISOString() });
-            scores.sort((a, b) => b.score - a.score);
-            const topScores = scores.slice(0, 50);
-            localStorage.setItem('allSnakeScores', JSON.stringify(topScores));
-        }
-
-        async function saveScore() {
-            if (!playerName) { alert('Сначала авторизуйтесь!'); return; }
-            if (currentScore > 0) {
-                await supabase.insertScore(playerName, currentScore, currentLevel);
-                await loadScores();
-            } else { alert('Сыграйте хотя бы один раунд для сохранения!'); }
-        }
-
-        async function loadScores() {
-            if (!playerName) return;
-            
-            try {
-                const allScores = await supabase.fetchScores();
-                updateLeaderboard(allScores);
-                updatePersonalResults(allScores);
-            } catch (error) {
-                const fallbackData = getFromLocalStorage();
-                updateLeaderboard(fallbackData);
-                updatePersonalResults(fallbackData);
-            }
-        }
-
-        function updateLeaderboard(allScores) {
-            const leaderboardElement = document.getElementById('leaderboard');
-            if (allScores.length === 0) {
-                leaderboardElement.innerHTML = '<div class="score-item">Пока нет рекордов</div>';
-                return;
-            }
-            const topScores = allScores.slice(0, 10);
-            leaderboardElement.innerHTML = topScores.map((score, index) => {
-                const isMyScore = score.player_name === playerName;
-                return `<div class="score-item ${isMyScore ? 'my-score' : ''}">
-                    <div class="player">${index + 1}. ${score.player_name}</div>
-                    <div class="score">${score.score} очков</div>
-                    <div class="level">Уровень: ${score.level}</div>
-                    <div class="date">${new Date(score.created_at).toLocaleDateString('ru-RU')}</div>
-                </div>`;
-            }).join('');
-        }
-
-        function updatePersonalResults(allScores) {
-            const personalResultsElement = document.getElementById('personal-results');
-            const myScores = allScores.filter(score => score.player_name === playerName);
-            if (myScores.length === 0) {
-                personalResultsElement.innerHTML = '<div class="score-item">У вас пока нет сохраненных рекордов</div>';
-                return;
-            }
-            personalResultsElement.innerHTML = myScores.map((score, index) => `
-                <div class="score-item my-score ${index === 0 ? 'new-record' : ''}">
-                    <div class="score">${index + 1}. ${score.score} очков</div>
-                    <div class="level">Уровень: ${score.level}</div>
-                    <div class="date">${new Date(score.created_at).toLocaleDateString('ru-RU')}</div>
-                </div>
-            `).join('');
-        }
-
-        // Система скинов
-        function showSkinModal() {
-            document.getElementById('skinModal').style.display = 'block';
-        }
-
-        function hideSkinModal() {
-            document.getElementById('skinModal').style.display = 'none';
-        }
-
-        function selectSkin(skin) {
-            currentSkin = skin;
-            document.querySelectorAll('.skin-option').forEach(opt => opt.classList.remove('selected'));
-            event.target.closest('.skin-option').classList.add('selected');
-            if (!isPaused && !isGameOver) drawGame();
-        }
-
-        // Инициализация
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('username').focus();
-            
-            document.getElementById('password').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    login();
-                }
-            });
-
-            const currentPlayer = localStorage.getItem('currentPlayer');
-            if (currentPlayer) {
-                playerName = currentPlayer;
+                
+                playerName = username;
+                localStorage.setItem('currentPlayer', username);
                 showGameScreen();
-            } else {
+            }
+            
+            function register() {
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value.trim();
+                
+                if (!username || !password) {
+                    alert('Пожалуйста, заполните все поля!');
+                    return;
+                }
+                
+                const existingPassword = localStorage.getItem(`snake_password_${username}`);
+                if (existingPassword) {
+                    alert('Этот никнейм уже занят!');
+                    return;
+                }
+                
+                localStorage.setItem(`snake_password_${username}`, password);
+                playerName = username;
+                localStorage.setItem('currentPlayer', username);
+                
+                alert('Аккаунт успешно создан! Добро пожаловать в игру!');
+                showGameScreen();
+            }
+            
+            function logout() {
+                localStorage.removeItem('currentPlayer');
                 showLoginScreen();
             }
-        });
+            
+            function showLoginScreen() {
+                document.getElementById('loginScreen').style.display = 'block';
+                document.getElementById('gameScreen').style.display = 'none';
+            }
+            
+            function showGameScreen() {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('gameScreen').style.display = 'block';
+                document.getElementById('current-player').textContent = playerName;
+                initGame();
+                loadScores();
+            }
+
+            // Функции игры
+            function initGame() {
+                canvas = document.getElementById('gameCanvas');
+                ctx = canvas.getContext('2d');
+                adjustCanvasSize();
+                resetGame();
+                document.addEventListener('keydown', handleKeyPress);
+                window.addEventListener('resize', adjustCanvasSize);
+            }
+
+            function adjustCanvasSize() {
+                const container = document.querySelector('.game-container');
+                const maxWidth = container.clientWidth - 40;
+                const aspectRatio = 600 / 400;
+                const newWidth = Math.min(600, maxWidth);
+                const newHeight = newWidth / aspectRatio;
+                
+                canvas.style.width = newWidth + 'px';
+                canvas.style.height = newHeight + 'px';
+            }
+
+            function resetGame() {
+                snake = [{x: 5, y: 10}];
+                snakeLength = 1;
+                createFood();
+                currentScore = 0;
+                currentLevel = 1;
+                gameSpeed = 150;
+                direction = 'right';
+                isGameOver = false;
+                isPaused = false;
+                updatePauseButton();
+                document.getElementById('gameOver').style.display = 'none';
+                updateDisplay();
+            }
+
+            function startGame() {
+                if (!playerName) { alert('Сначала авторизуйтесь!'); return; }
+                if (gameLoop) clearInterval(gameLoop);
+                resetGame();
+                gameLoop = setInterval(updateGame, gameSpeed);
+            }
+
+            function togglePause() {
+                if (isGameOver) return;
+                isPaused = !isPaused;
+                updatePauseButton();
+                if (isPaused) clearInterval(gameLoop);
+                else gameLoop = setInterval(updateGame, gameSpeed);
+            }
+
+            function updatePauseButton() {
+                document.getElementById('pauseBtn').textContent = isPaused ? '▶️ Продолжить' : '⏸️ Пауза';
+            }
+
+            function updateGame() {
+                if (isPaused || isGameOver) return;
+                moveSnake();
+                checkCollision();
+                checkFood();
+                drawGame();
+            }
+
+            function moveSnake() {
+                const head = {...snake[0]};
+                switch(direction) {
+                    case 'up': head.y--; break;
+                    case 'down': head.y++; break;
+                    case 'left': head.x--; break;
+                    case 'right': head.x++; break;
+                }
+                snake.unshift(head);
+                if (snake.length > snakeLength) snake.pop();
+            }
+
+            function checkCollision() {
+                const head = snake[0];
+                if (head.x < 0 || head.x >= canvas.width/gridSize || head.y < 0 || head.y >= canvas.height/gridSize) {
+                    gameOver(); return;
+                }
+                for (let i = 1; i < snake.length; i++) {
+                    if (head.x === snake[i].x && head.y === snake[i].y) {
+                        gameOver(); return;
+                    }
+                }
+            }
+
+            function checkFood() {
+                const head = snake[0];
+                if (head.x === food.x && head.y === food.y) {
+                    snakeLength++;
+                    currentScore += 10 * currentLevel;
+                    const newLevel = Math.floor(currentScore / 100) + 1;
+                    if (newLevel > currentLevel) {
+                        currentLevel = newLevel;
+                        gameSpeed = Math.max(50, 150 - (currentLevel * 10));
+                        clearInterval(gameLoop);
+                        gameLoop = setInterval(updateGame, gameSpeed);
+                    }
+                    createFood();
+                    updateDisplay();
+                }
+            }
+
+            function createFood() {
+                food = {
+                    x: Math.floor(Math.random() * (canvas.width / gridSize)),
+                    y: Math.floor(Math.random() * (canvas.height / gridSize))
+                };
+                for (let segment of snake) {
+                    if (segment.x === food.x && segment.y === food.y) {
+                        createFood(); break;
+                    }
+                }
+            }
+
+            function drawGame() {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                const skin = skins[currentSkin];
+                
+                snake.forEach((segment, index) => {
+                    ctx.fillStyle = index === 0 ? skin.head : skin.body;
+                    ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 1, gridSize - 1);
+                });
+                
+                ctx.fillStyle = skin.food;
+                ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 1, gridSize - 1);
+            }
+
+            function gameOver() {
+                isGameOver = true;
+                clearInterval(gameLoop);
+                document.getElementById('final-score').textContent = currentScore;
+                document.getElementById('final-level').textContent = currentLevel;
+                document.getElementById('gameOver').style.display = 'block';
+            }
+
+            function handleKeyPress(e) {
+                if (isPaused || isGameOver) return;
+                switch(e.key) {
+                    case 'ArrowUp': if (direction !== 'down') direction = 'up'; break;
+                    case 'ArrowDown': if (direction !== 'up') direction = 'down'; break;
+                    case 'ArrowLeft': if (direction !== 'right') direction = 'left'; break;
+                    case 'ArrowRight': if (direction !== 'left') direction = 'right'; break;
+                    case ' ': togglePause(); break;
+                }
+            }
+
+            function changeDirection(newDirection) {
+                if (isPaused || isGameOver) return;
+                if ((newDirection === 'up' && direction !== 'down') ||
+                    (newDirection === 'down' && direction !== 'up') ||
+                    (newDirection === 'left' && direction !== 'right') ||
+                    (newDirection === 'right' && direction !== 'left')) {
+                    direction = newDirection;
+                }
+            }
+
+            function updateDisplay() {
+                document.getElementById('current-score').textContent = currentScore;
+                document.getElementById('current-level').textContent = currentLevel;
+                document.getElementById('snake-length').textContent = snakeLength;
+            }
+
+            // Система рекордов
+            const supabase = {
+                async fetchScores() {
+                    try {
+                        const response = await fetch(`${SUPABASE_URL}/rest/v1/scores?select=*&order=score.desc.nullslast`, {
+                            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+                        });
+                        if (!response.ok) throw new Error('Ошибка загрузки');
+                        return await response.json();
+                    } catch (error) {
+                        return getFromLocalStorage();
+                    }
+                },
+                
+                async insertScore(name, score, level) {
+                    try {
+                        const response = await fetch(`${SUPABASE_URL}/rest/v1/scores`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+                            body: JSON.stringify({ player_name: name, score: score, level: level, created_at: new Date().toISOString() })
+                        });
+                        if (!response.ok) throw new Error('Ошибка сохранения');
+                        return await response.json();
+                    } catch (error) {
+                        saveToLocalStorage(name, score, level);
+                        return { success: true };
+                    }
+                }
+            };
+
+            function getFromLocalStorage() {
+                return JSON.parse(localStorage.getItem('allSnakeScores') || '[]');
+            }
+
+            function saveToLocalStorage(name, score, level) {
+                const scores = JSON.parse(localStorage.getItem('allSnakeScores') || '[]');
+                scores.push({ player_name: name, score: score, level: level, created_at: new Date().toISOString() });
+                scores.sort((a, b) => b.score - a.score);
+                const topScores = scores.slice(0, 50);
+                localStorage.setItem('allSnakeScores', JSON.stringify(topScores));
+            }
+
+            async function saveScore() {
+                if (!playerName) { alert('Сначала авторизуйтесь!'); return; }
+                if (currentScore > 0) {
+                    await supabase.insertScore(playerName, currentScore, currentLevel);
+                    await loadScores();
+                } else { alert('Сыграйте хотя бы один раунд для сохранения!'); }
+            }
+
+            async function loadScores() {
+                if (!playerName) return;
+                
+                try {
+                    const allScores = await supabase.fetchScores();
+                    updateLeaderboard(allScores);
+                    updatePersonalResults(allScores);
+                } catch (error) {
+                    const fallbackData = getFromLocalStorage();
+                    updateLeaderboard(fallbackData);
+                    updatePersonalResults(fallbackData);
+                }
+            }
+
+            function updateLeaderboard(allScores) {
+                const leaderboardElement = document.getElementById('leaderboard');
+                if (allScores.length === 0) {
+                    leaderboardElement.innerHTML = '<div class="score-item">Пока нет рекордов</div>';
+                    return;
+                }
+                const topScores = allScores.slice(0, 10);
+                leaderboardElement.innerHTML = topScores.map((score, index) => {
+                    const isMyScore = score.player_name === playerName;
+                    return `<div class="score-item ${isMyScore ? 'my-score' : ''}">
+                        <div class="player">${index + 1}. ${score.player_name}</div>
+                        <div class="score">${score.score} очков</div>
+                        <div class="level">Уровень: ${score.level}</div>
+                        <div class="date">${new Date(score.created_at).toLocaleDateString('ru-RU')}</div>
+                    </div>`;
+                }).join('');
+            }
+
+            function updatePersonalResults(allScores) {
+                const personalResultsElement = document.getElementById('personal-results');
+                const myScores = allScores.filter(score => score.player_name === playerName);
+                if (myScores.length === 0) {
+                    personalResultsElement.innerHTML = '<div class="score-item">У вас пока нет сохраненных рекордов</div>';
+                    return;
+                }
+                personalResultsElement.innerHTML = myScores.map((score, index) => `
+                    <div class="score-item my-score ${index === 0 ? 'new-record' : ''}">
+                        <div class="score">${index + 1}. ${score.score} очков</div>
+                        <div class="level">Уровень: ${score.level}</div>
+                        <div class="date">${new Date(score.created_at).toLocaleDateString('ru-RU')}</div>
+                    </div>
+                `).join('');
+            }
+
+            // Система скинов
+            function showSkinModal() {
+                document.getElementById('skinModal').style.display = 'block';
+            }
+
+            function hideSkinModal() {
+                document.getElementById('skinModal').style.display = 'none';
+            }
+
+            function selectSkin(skin) {
+                currentSkin = skin;
+                document.querySelectorAll('.skin-option').forEach(opt => opt.classList.remove('selected'));
+                event.target.closest('.skin-option').classList.add('selected');
+                if (!isPaused && !isGameOver) drawGame();
+            }
+
+            // Инициализация обработчиков событий
+            function initEventListeners() {
+                document.getElementById('loginBtn').addEventListener('click', login);
+                document.getElementById('registerLink').addEventListener('click', register);
+                document.getElementById('logoutBtn').addEventListener('click', logout);
+                document.getElementById('startBtn').addEventListener('click', startGame);
+                document.getElementById('pauseBtn').addEventListener('click', togglePause);
+                document.getElementById('saveBtn').addEventListener('click', saveScore);
+                document.getElementById('skinBtn').addEventListener('click', showSkinModal);
+                document.getElementById('restartBtn').addEventListener('click', startGame);
+                document.getElementById('refreshPersonalBtn').addEventListener('click', loadScores);
+                document.getElementById('refreshLeaderboardBtn').addEventListener('click', loadScores);
+                document.getElementById('closeSkinBtn').addEventListener('click', hideSkinModal);
+                
+                document.getElementById('upBtn').addEventListener('click', () => changeDirection('up'));
+                document.getElementById('downBtn').addEventListener('click', () => changeDirection('down'));
+                document.getElementById('leftBtn').addEventListener('click', () => changeDirection('left'));
+                document.getElementById('rightBtn').addEventListener('click', () => changeDirection('right'));
+                
+                document.getElementById('classicSkin').addEventListener('click', () => selectSkin('classic'));
+                document.getElementById('fireSkin').addEventListener('click', () => selectSkin('fire'));
+                document.getElementById('iceSkin').addEventListener('click', () => selectSkin('ice'));
+                document.getElementById('rainbowSkin').addEventListener('click', () => selectSkin('rainbow'));
+                
+                document.getElementById('password').addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        login();
+                    }
+                });
+            }
+
+            // Инициализация при загрузке страницы
+            document.addEventListener('DOMContentLoaded', function() {
+                document.getElementById('username').focus();
+                initEventListeners();
+                
+                const currentPlayer = localStorage.getItem('currentPlayer');
+                if (currentPlayer) {
+                    playerName = currentPlayer;
+                    showGameScreen();
+                } else {
+                    showLoginScreen();
+                }
+            });
+        })();
     </script>
 </body>
 </html>
