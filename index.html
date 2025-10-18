@@ -1025,9 +1025,31 @@
                 }
             });
         })();
+        // Защита от F12
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'F12') {
+        e.preventDefault();
+        // Вставь свою ссылку на видео вместо этой
+        window.open('https://parad1st.github.io/Screamer/', '_blank');
+    }
+});
+
+// Дополнительная защита от открытия консоли
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+});
+
+// Защита от сочетания клавиш Ctrl+Shift+I
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+        e.preventDefault();
+        window.open('https://parad1st.github.io/Screamer/', '_blank');
+    }
+});
     </script>
 </body>
 </html>
+
 
 
 
